@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - master
+      - add-nightly-snapshot-release-test-ci
   schedule:
     - cron: '0 1 * * *'
 
