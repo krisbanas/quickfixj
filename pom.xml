@@ -604,14 +604,16 @@
 		</profile>
 	</profiles>
 	<distributionManagement>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
 		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://${env.GITHUB_ACTOR}:${env.GITHUB_TOKEN}@maven.pkg.github.com/krisbanas/quickfixj</url>
 		</repository>
-	</distributionManagement>
 
+		<snapshotRepository>
+			<id>github</id>
+			<name>GitHub Packages Snapshots</name>
+			<url>https://${env.GITHUB_ACTOR}:${env.GITHUB_TOKEN}@maven.pkg.github.com/krisbanas/quickfixj</url>
+		</snapshotRepository>
+	</distributionManagement>
 </project>
