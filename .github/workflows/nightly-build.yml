@@ -1,5 +1,9 @@
 name: Java SNAPSHOT Release
 
+permissions:
+  contents: read
+  packages: write
+
 on:
   workflow_dispatch:
   push:
@@ -14,20 +18,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK & Maven credentials
+
+      - name: Set up JDK & configure Maven creds
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: 21
-          cache: 'maven'
-          server-id: github
-          server-username: ${{ github.actor }}
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+          server-id: github                        # <– must match your <id> in the POM
+          server-username: ${{ github.actor }}     # provided by the runner
           server-password: ${{ secrets.GITHUB_TOKEN }}
 
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Build and Publish SNAPSHOT
-        run: ./mvnw deploy -X -B -V -D"maven.javadoc.skip"="true" -D"java.util.logging.config.file"="${{github.workspace}}/quickfixj-core/src/test/resources/logging.properties" -D"http.keepAlive"="false" -D"maven.wagon.http.pool"="false" -D"maven.wagon.httpconnectionManager.ttlSeconds"="120"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./mvnw clean deploy -X -B \
+          -Dmaven.javadoc.skip=true \
+          -DskipTests
