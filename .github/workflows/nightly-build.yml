@@ -14,14 +14,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK
+      - name: Set up JDK & Maven credentials
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: 21
           cache: 'maven'
+          server-id: github
           server-username: ${{ github.actor }}
           server-password: ${{ secrets.GITHUB_TOKEN }}
+
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
