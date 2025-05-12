@@ -31,6 +31,4 @@ jobs:
           server-password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Publish SNAPSHOT
-        run: ./mvnw clean deploy -X -B \
-          -Dmaven.javadoc.skip=true \
-          -DskipTests
+        run: ./mvnw deploy -X -B -V -D"maven.javadoc.skip"="true" -D"java.util.logging.config.file"="${{github.workspace}}/quickfixj-core/src/test/resources/logging.properties" -D"http.keepAlive"="false" -D"maven.wagon.http.pool"="false" -D"maven.wagon.httpconnectionManager.ttlSeconds"="120"
