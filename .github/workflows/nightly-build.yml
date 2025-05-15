@@ -33,4 +33,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Publish SNAPSHOT
-        run: cat /home/runner/.m2/settings.xml
+        run: ./mvnw deploy
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
