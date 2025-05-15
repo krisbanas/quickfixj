@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK & configure Maven creds
+      - name: Set up JDK and Maven
         uses: actions/setup-java@v4
         with:
           distribution: temurin
