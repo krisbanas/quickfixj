@@ -1,7 +1,6 @@
 name: Java SNAPSHOT Release
 
 permissions:
-  contents: read
   packages: write
 
 on:
@@ -25,12 +24,8 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: maven
-          server-id: github
-          server-username: GITHUB_USERNAME
-          server-password: GITHUB_TOKEN
 
       - name: Deploy with Maven
-        run: ./mvnw deploy -B
+        run: ./mvnw deploy -B -V -D"maven.javadoc.skip"="true" -D"java.util.logging.config.file"="${{github.workspace}}/quickfixj-core/src/test/resources/logging.properties" -D"http.keepAlive"="false" -D"maven.wagon.http.pool"="false" -D"maven.wagon.httpconnectionManager.ttlSeconds"="120"
         env:
-          GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
