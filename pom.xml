@@ -606,14 +606,12 @@
 	<distributionManagement>
 		<repository>
 			<id>github</id>
-			<layout>default</layout>
 			<name>GitHub Packages</name>
 			<url>https://maven.pkg.github.com/krisbanas/quickfixj</url>
 		</repository>
 
 		<snapshotRepository>
 			<id>github</id>
-			<layout>default</layout>
 			<name>GitHub Packages Snapshots</name>
 			<url>https://maven.pkg.github.com/krisbanas/quickfixj</url>
 		</snapshotRepository>
