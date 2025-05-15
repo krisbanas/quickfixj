@@ -26,9 +26,11 @@ jobs:
           java-version: '21'
           cache: maven
 
-          server-id: github                        # <– must match your <id> in the POM
-          server-username: ${{ github.actor }}     # provided by the runner
-          server-password: ${{ secrets.GITHUB_TOKEN }}
+          server-id: github
+          server-username: ${{ github.actor }}
+          server-password: ${{ env.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and Publish SNAPSHOT
         run: cat /home/runner/.m2/settings.xml
