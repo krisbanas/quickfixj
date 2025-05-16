@@ -1,23 +1,54 @@
-name: Cleanup Old SNAPSHOTs
+name: List GitHub Package Versions
 
 on:
-  workflow_dispatch:      # Allows manual triggering
-  push:
-    branches:
-      - add-nightly-snapshot-release-test-ci
+  workflow_dispatch:
 
 permissions:
-  packages: write
+  packages: read
+  contents: read
 
 jobs:
-  cleanup:
+  list-package-versions:
     runs-on: ubuntu-latest
     steps:
-      - name: Delete old SNAPSHOTs
-        uses: actions/delete-package-versions@v5
-        with:
-          package-name: org.quickfixj.quickfixj-messages-all  # Replace with your package name
-          package-type: 'maven'
-          min-versions-to-keep: 3
-          delete-only-pre-release-versions: true
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: List versions for org.quickfixj.quickfixj-messages-all
+        shell: python
+        env:
+          GITHUB_OWNER: krisbanas
+          PACKAGE_NAME: org.quickfixj.quickfixj-messages-all
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          import os
+          import requests
+
+          owner = os.getenv("GITHUB_OWNER")
+          package = os.getenv("PACKAGE_NAME")
+          token = os.getenv("GITHUB_TOKEN")
+
+          headers = {
+              "Accept": "application/vnd.github+json",
+              "Authorization": f"Bearer {token}"
+          }
+
+          url = f"https://api.github.com/users/{owner}/packages/maven/{package}/versions?per_page=100"
+
+          response = requests.get(url, headers=headers)
+
+          if response.status_code != 200:
+              print("Failed to fetch package versions")
+              print(f"Status: {response.status_code}")
+              print(response.text)
+              exit(1)
+
+          versions = response.json()
+
+          print(f"📦 Found {len(versions)} versions for package: {package}\n")
+
+          for v in versions:
+              print(f"🔹 ID: {v['id']}")
+              print(f"   Name: {v['name']}")
+              print(f"   URL: {v['url']}")
+              print(f"   Created: {v['created_at']}")
+              print(f"   Updated: {v['updated_at']}")
+              print(f"   Metadata: {v.get('metadata', {})}")
+              print("-" * 50)
