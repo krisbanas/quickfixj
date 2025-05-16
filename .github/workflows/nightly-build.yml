@@ -2,6 +2,9 @@ name: Cleanup Old SNAPSHOTs
 
 on:
   workflow_dispatch:      # Allows manual triggering
+  push:
+    branches:
+      - qadd-nightly-snapshot-release-test-ci
 
 permissions:
   packages: write
