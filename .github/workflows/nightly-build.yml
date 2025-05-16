@@ -1,20 +1,21 @@
-name: List GitHub Package Versions
+name: List and Clean Up Maven Artifacts by Version
 
 on:
   workflow_dispatch:
   push:
     branches:
+      - master
       - add-nightly-snapshot-release-test-ci
 
 permissions:
-  packages: read
   contents: read
+  packages: write
 
 jobs:
-  list-package-versions:
+  inspect-and-clean:
     runs-on: ubuntu-latest
     steps:
-      - name: List versions for org.quickfixj.quickfixj-messages-all
+      - name: Show artifacts and delete old versions
         shell: python
         env:
           GITHUB_OWNER: krisbanas
@@ -23,6 +24,7 @@ jobs:
         run: |
           import os
           import requests
+          from datetime import datetime, timezone, timedelta
 
           owner = os.getenv("GITHUB_OWNER")
           package = os.getenv("PACKAGE_NAME")
@@ -33,25 +35,54 @@ jobs:
               "Authorization": f"Bearer {token}"
           }
 
-          url = f"https://api.github.com/users/{owner}/packages/maven/{package}/versions?per_page=100"
+          def list_versions(page=1):
+              url = f"https://api.github.com/users/{owner}/packages/maven/{package}/versions?per_page=100&page={page}"
+              resp = requests.get(url, headers=headers)
+              if resp.status_code != 200:
+                  print(f"Error listing versions: {resp.status_code}")
+                  print(resp.text)
+                  return []
+              return resp.json()
 
-          response = requests.get(url, headers=headers)
+          def delete_version(version_id):
+              url = f"https://api.github.com/users/{owner}/packages/maven/{package}/versions/{version_id}"
+              resp = requests.delete(url, headers=headers)
+              if resp.status_code == 204:
+                  print(f"✅ Deleted version ID {version_id}")
+              else:
+                  print(f"❌ Failed to delete version {version_id}: {resp.status_code}")
+                  print(resp.text)
 
-          if response.status_code != 200:
-              print("Failed to fetch package versions")
-              print(f"Status: {response.status_code}")
-              print(response.text)
-              exit(1)
+          cutoff = datetime.now(timezone.utc) - timedelta(days=30)
+          print(f"📅 Deleting versions older than: {cutoff.isoformat()}")
 
-          versions = response.json()
+          page = 1
+          while True:
+              versions = list_versions(page)
+              if not versions:
+                  break
 
-          print(f"📦 Found {len(versions)} versions for package: {package}\n")
+              for v in versions:
+                  vid = v['id']
+                  name = v['name']
+                  created = datetime.fromisoformat(v['created_at'].replace('Z', '+00:00'))
+                  print(f"\n🔹 Version: {name} (ID: {vid})")
+                  print(f"   Created: {created}")
+                  print(f"   Artifacts:")
 
-          for v in versions:
-              print(f"🔹 ID: {v['id']}")
-              print(f"   Name: {v['name']}")
-              print(f"   URL: {v['url']}")
-              print(f"   Created: {v['created_at']}")
-              print(f"   Updated: {v['updated_at']}")
-              print(f"   Metadata: {v.get('metadata', {})}")
-              print("-" * 50)
+                  metadata = v.get("metadata", {})
+                  container = metadata.get("container", {})
+                  if container:
+                      for file in container.get("tags", []):
+                          print(f"     📄 {file}")
+                  else:
+                      print("     ⚠️ No detailed artifact metadata available")
+
+                  if created < cutoff:
+                      print(f"   🚨 Deleting version '{name}' (older than 30 days)")
+                  else:
+                      print(f"   ✅ Keeping version '{name}'")
+
+              if len(versions) < 100:
+                  break
+              page += 1
