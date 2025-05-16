@@ -4,7 +4,7 @@ on:
   workflow_dispatch:      # Allows manual triggering
   push:
     branches:
-      - qadd-nightly-snapshot-release-test-ci
+      - add-nightly-snapshot-release-test-ci
 
 permissions:
   packages: write
