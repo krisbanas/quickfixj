@@ -45,7 +45,16 @@ jobs:
                   return []
               return resp.json()
 
-          print("📦 Listing all package versions and their details:")
+          def get_version_detail(version_id):
+              url = f"https://api.github.com/users/{owner}/packages/maven/{package}/versions/{version_id}"
+              resp = requests.get(url, headers=headers)
+              if resp.status_code != 200:
+                  print(f"Error retrieving version {version_id}: {resp.status_code}")
+                  print(resp.text)
+                  return None
+              return resp.json()
+
+          print("📦 Listing all package versions and their artifact details:")
 
           page = 1
           while True:
@@ -54,7 +63,10 @@ jobs:
                   break
 
               for v in versions:
-                  print(json.dumps(v, indent=2))
+                  version_id = v["id"]
+                  detailed = get_version_detail(version_id)
+                  if detailed:
+                      print(json.dumps(detailed, indent=2))
 
               if len(versions) < 100:
                   break
