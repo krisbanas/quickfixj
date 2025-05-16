@@ -1,31 +1,20 @@
-name: Java SNAPSHOT Release
+name: Cleanup Old SNAPSHOTs
+
+on:
+  workflow_dispatch:      # Allows manual triggering
 
 permissions:
   packages: write
 
-on:
-  workflow_dispatch:
-  push:
-    branches:
-      - master
-      - add-nightly-snapshot-release-test-ci
-  schedule:
-    - cron: '0 1 * * *'
-
 jobs:
-  release-snapshot:
+  cleanup:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up JDK and Maven
-        uses: actions/setup-java@v4
+      - name: Delete old SNAPSHOTs
+        uses: actions/delete-package-versions@v5
         with:
-          distribution: temurin
-          java-version: 21
-          cache: maven
-
-      - name: Deploy with Maven
-        run: ./mvnw deploy -B -V -D"maven.javadoc.skip"="true" -D"java.util.logging.config.file"="${{github.workspace}}/quickfixj-core/src/test/resources/logging.properties" -D"http.keepAlive"="false" -D"maven.wagon.http.pool"="false" -D"maven.wagon.httpconnectionManager.ttlSeconds"="120"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          package-name: org.quickfixj.quickfixj-messages-all  # Replace with your package name
+          package-type: 'maven'
+          min-versions-to-keep: 4
+          delete-only-pre-release-versions: true
+          token: ${{ secrets.GITHUB_TOKEN }}
