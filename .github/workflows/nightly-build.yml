@@ -2,6 +2,9 @@ name: List GitHub Package Versions
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - *q
 
 permissions:
   packages: read
